@@ -279,6 +279,17 @@
                                 </args>
                             </configuration>
                         </execution>
+                        <execution>
+                            <id>attach-javadocs</id>
+                            <goals>
+                                <goal>doc-jar</goal>
+                            </goals>
+                            <configuration>
+                                <args>
+                                    <arg>${scaladoc.arg}</arg>
+                                </args>
+                            </configuration>
+                        </execution>
                     </executions>
                 </plugin>
                 <plugin>
@@ -414,6 +425,28 @@
                 <artifactId>apache-rat-plugin</artifactId>
                 <version>0.13</version>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <configuration>
+                            <executable>python3</executable>
+                            <workingDirectory>${maven.multiModuleProjectDirectory}</workingDirectory>
+                            <arguments>
+                                <argument>spark-version-converter.py</argument>
+                                <argument>${spark.converter.version}</argument>
+                            </arguments>
+                        </configuration>
+                        <id>python_build</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <profiles>
@@ -447,6 +480,7 @@
             <properties>
                 <spark.version>3.0.1</spark.version>
                 <spark.compat.version>3.0</spark.compat.version>
+                <spark.converter.version>spark3</spark.converter.version>
                 <jackson.version>2.10.0</jackson.version>
             </properties>
         </profile>
@@ -462,6 +496,7 @@
             <properties>
                 <spark.version>2.4.7</spark.version>
                 <spark.compat.version>2.4</spark.compat.version>
+                <spark.converter.version>spark2</spark.converter.version>
                 <jackson.version>2.6.7</jackson.version>
             </properties>
         </profile>
@@ -477,6 +512,7 @@
             <properties>
                 <scala.version>2.12.8</scala.version>
                 <scala.compat.version>2.12</scala.compat.version>
+                <scaladoc.arg>-no-java-comments</scaladoc.arg>
             </properties>
         </profile>
         <profile>
@@ -491,6 +527,7 @@
             <properties>
                 <scala.version>2.11.8</scala.version>
                 <scala.compat.version>2.11</scala.compat.version>
+                <scaladoc.arg />
             </properties>
         </profile>
     </profiles>

@@ -1,12 +1,12 @@
 # Compile and Publish Sedona
 
-[![Scala and Java build](https://github.com/apache/incubator-sedona/workflows/Scala%20and%20Java%20build/badge.svg)](https://github.com/apache/incubator-sedona/actions?query=workflow%3A%22Scala+and+Java+build%22) [![Python build](https://github.com/apache/incubator-sedona/workflows/Python%20build/badge.svg)](https://github.com/apache/incubator-sedona/actions?query=workflow%3A%22Python+build%22)
+[![Scala and Java build](https://github.com/apache/incubator-sedona/workflows/Scala%20and%20Java%20build/badge.svg)](https://github.com/apache/incubator-sedona/actions?query=workflow%3A%22Scala+and+Java+build%22) [![Python build](https://github.com/apache/incubator-sedona/workflows/Python%20build/badge.svg)](https://github.com/apache/incubator-sedona/actions?query=workflow%3A%22Python+build%22) ![Example project build](https://github.com/apache/incubator-sedona/workflows/Example%20project%20build/badge.svg)
 
 
 ## Compile Scala and Java source code
 Sedona Scala/Java code is a project with four modules, core, sql, viz and python adapter. Each module is a Scala/Java mixed project which is managed by Apache Maven 3.
 
-* Make sure your machine has Java 1.8 and Apache Maven 3.
+* Make sure your Linux/Mac machine has Java 1.8, Apache Maven 3.3.1+, and Python3. The compilation of Sedona is not tested on Windows machine.
 
 To compile all modules, please make sure you are in the root folder of three modules. Then enter the following command in the terminal:
 
@@ -125,13 +125,8 @@ You should first compile the entire docs using `mkdocs build` to get the `site` 
 
 #### Copy
 
-Copy the generated Javadoc (Scaladoc should already be there) to the corresponding folders in `site/api/javadoc`
-
-#### Deploy to ASF domain
-
-1. Copy the generated Javadoc and Scaladoc to the correct location in `docs/api/javadoc`
-
-2. Then deploy Javadoc and Scaladoc with the project website
+1. Copy the generated Javadoc (Scaladoc should already be there) to the corresponding folders in `site/api/javadoc`
+2. Deploy Javadoc and Scaladoc with the project website
 
 ## Publish SNAPSHOTs
 
@@ -143,45 +138,33 @@ The detailed requirement is on [ASF Infra website](https://infra.apache.org/publ
 
 #### Prepare for Spark 3.0 and Scala 2.12
 
-1. Convert source code to Spark 3 format
-```
-python3 spark-version-converter.py spark3
-```
-2. Prepare the SNAPSHOTs
+1. Prepare the SNAPSHOTs
 ```
 mvn clean -Darguments="-DskipTests" release:prepare -DdryRun=true -DautoVersionSubmodules=true -Dresume=false
 ```
-3. Deploy the SNAPSHOTs
+2. Deploy the SNAPSHOTs
 ```
 mvn deploy -DskipTests
 ```
 
 #### Prepare for Spark 2.4 and Scala 2.11
 
-1. Convert source code to Spark 2 format
-```
-python3 spark-version-converter.py spark2
-```
-2. Prepare the SNAPSHOTs
+1. Prepare the SNAPSHOTs
 ```
 mvn clean release:prepare -DdryRun=true -DautoVersionSubmodules=true -Dresume=false -DcheckModificationExcludeList=sql/src/main/scala/org/apache/sedona/sql/UDF/UdfRegistrator.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/JoinQueryDetector.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/TraitJoinQueryExec.scala -Darguments="-DskipTests -Dscala=2.11 -Dspark=2.4"
 ```
-3. Deploy the SNAPSHOTs
+2. Deploy the SNAPSHOTs
 ```
 mvn deploy -DskipTests -Dscala=2.11 -Dspark=2.4
 ```
 
 #### Prepare for Spark 2.4 and Scala 2.12
 
-1. Convert source code to Spark 2 format
-```
-python3 spark-version-converter.py spark2
-```
-2. Prepare the SNAPSHOTs
+1. Prepare the SNAPSHOTs
 ```
 mvn clean release:prepare -DdryRun=true -DautoVersionSubmodules=true -Dresume=false -DcheckModificationExcludeList=sql/src/main/scala/org/apache/sedona/sql/UDF/UdfRegistrator.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/JoinQueryDetector.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/TraitJoinQueryExec.scala -Darguments="-DskipTests -Dscala=2.12 -Dspark=2.4"
 ```
-3. Deploy the SNAPSHOTs
+2. Deploy the SNAPSHOTs
 ```
 mvn deploy -DskipTests -Dscala=2.12 -Dspark=2.4
 ```
@@ -194,58 +177,44 @@ mvn deploy -DskipTests -Dscala=2.12 -Dspark=2.4
 
 #### For Spark 3.0 and Scala 2.12
 
-1. Convert source code to Spark 3 format
-```bash
-python3 spark-version-converter.py spark3
-```
-2. Prepare a release. Manually enter the following variables in the terminal: release id: ==1.0.0-incubator==, scm tag id: ==sedona-3.0_2.12-1.0.0-incubator== (this is just an example. Please use the correct version number). You also need to provide GitHub username and password
+1. Prepare a release. Manually enter the following variables in the terminal: release id: ==1.0.0-incubator==, scm tag id: ==sedona-1.0.0-incubator== (this is just an example. Please use the correct version number). You also need to provide GitHub username and password three times.
 ```bash
 mvn clean release:prepare -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests" 
 ```
-3. Stage a release
+2. Stage a release
 ```bash
 mvn clean release:perform -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests" 
 ```
-4. Now the releases are staged. A tag and two commits will be created on Sedona GitHub repo.
+3. Now the releases are staged. A tag and two commits will be created on Sedona GitHub repo.
+4. Delete the scm tag on GitHub and we will only keep the tag created by the last compilation target.
 
 Now let's repeat the process to other Sedona modules.
 
 #### For Spark 2.4 and Scala 2.11
 
-1. Convert source code to Spark 2 format
-```bash
-python3 spark-version-converter.py spark2
-```
-2. Manuallly commit the changes of the three scala files to GitHub
-3. Prepare a release. Note that: release id: ==1.0.0-incubator==, scm tag id: ==sedona-2.4_2.11-1.0.0-incubator== (this is just an example. Please use the correct version number)
+1. Prepare a release. Note that: release id: ==1.0.0-incubator==, scm tag id: ==sedona-1.0.0-incubator== (this is just an example. Please use the correct version number)
 ```bash
 mvn clean release:prepare -DautoVersionSubmodules=true -Dresume=false -DcheckModificationExcludeList=sql/src/main/scala/org/apache/sedona/sql/UDF/UdfRegistrator.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/JoinQueryDetector.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/TraitJoinQueryExec.scala -Darguments="-DskipTests -Dscala=2.11 -Dspark=2.4"
 ```
-4. Stage a release
+2. Stage a release
 ```bash
 mvn clean release:perform -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.11 -Dspark=2.4"
 ```
+3. Delete the scm tag on GitHub and we will only keep the tag created by the last compilation target.
 
 #### For Spark 2.4 and Scala 2.12
 
-Step 1 and 2 are only needed if you didn't run the previous step before
-
-1. Convert source code to Spark 2 format
-```bash
-python3 spark-version-converter.py spark2
-```
-2. ==Manuallly commit the changes of the three scala files to GitHub==
-3. Prepare a release: release id: ==1.0.0-incubator==, scm tag id: ==sedona-2.4_2.12-1.0.0-incubator==  (this is just an example. Please use the correct version number)
+1. Prepare a release: release id: ==1.0.0-incubator==, scm tag id: ==sedona-1.0.0-incubator== (this is just an example. Please use the correct version number)
 ```bash
 mvn clean release:prepare -DautoVersionSubmodules=true -Dresume=false -DcheckModificationExcludeList=sql/src/main/scala/org/apache/sedona/sql/UDF/UdfRegistrator.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/JoinQueryDetector.scala,sql/src/main/scala/org/apache/spark/sql/sedona_sql/strategy/join/TraitJoinQueryExec.scala -Darguments="-DskipTests -Dscala=2.12 -Dspark=2.4"
 ```
-4. Stage a release
+2. Stage a release
 ```bash
 mvn clean release:perform -DautoVersionSubmodules=true -Dresume=false -Darguments="-DskipTests -Dscala=2.12 -Dspark=2.4"
 ```
 
 !!!warning
-	After staged the three releases, you need to manually revert the commited three scala files. You will see 6 [maven-release-plugin] commits and 3 more tags in Sedona GitHub repo.
+	After staged the three releases, you will see 6 [maven-release-plugin] commits and 1 more tag in Sedona GitHub repo.
 
 ### Close the staging repo
 1. Check the status of the staging repo: [Locate and Examine Your Staging Repository
