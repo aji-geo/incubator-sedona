@@ -45,7 +45,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll{
   Logger.getLogger("org").setLevel(Level.WARN)
   Logger.getLogger("akka").setLevel(Level.WARN)
   val prop = new Properties()
-  val resourceFolder = System.getProperty("user.dir") + "/src/test/resources/"
+  val resourceFolder = System.getProperty("user.dir") + "/../core/src/test/resources/"
   val demoOutputPath = "target/scala/demo"
   var ConfFile = new FileInputStream(resourceFolder + "babylon.point.properties")
   prop.load(ConfFile)
@@ -77,7 +77,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll{
   val LineStringSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"))
   val LineStringNumPartitions = prop.getProperty("numPartitions").toInt
   val USMainLandBoundary = new Envelope(-126.790180, -64.630926, 24.863836, 50.000)
-  val earthdataInputLocation = System.getProperty("user.dir") + "/src/test/resources/modis/modis.csv"
+  val earthdataInputLocation = resourceFolder + "modis/modis.csv"
   val earthdataNumPartitions = 5
   val HDFIncrement = 5
   val HDFOffset = 2
@@ -85,7 +85,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll{
   val HDFDataVariableName = "LST"
   val HDFDataVariableList = Array("LST", "QC", "Error_LST", "Emis_31", "Emis_32")
   val HDFswitchXY = true
-  val urlPrefix = System.getProperty("user.dir") + "/src/test/resources/modis/"
+  val urlPrefix = resourceFolder + "modis/"
 
   override def beforeAll(): Unit = {
     sparkContext = new SparkContext(sparkConf)
@@ -164,7 +164,8 @@ class scalaTest extends FunSpec with BeforeAndAfterAll{
       true
     }
 
-    it("should pass earth data hdf scatter plot") {
+    // Tests here have been ignored. A new feature that reads HDF will be added.
+    ignore("should pass earth data hdf scatter plot") {
       val earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement, HDFOffset, HDFRootGroupName,
         HDFDataVariableList, HDFDataVariableName, HDFswitchXY, urlPrefix)
       val spatialRDD = new PointRDD(sparkContext, earthdataInputLocation, earthdataNumPartitions, earthdataHDFPoint, StorageLevel.MEMORY_ONLY)

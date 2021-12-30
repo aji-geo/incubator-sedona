@@ -23,7 +23,6 @@ import org.apache.commons.lang.NullArgumentException;
 import org.apache.log4j.Logger;
 import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
-import org.apache.sedona.core.geometryObjects.GeoJSONWriterNew;
 import org.apache.sedona.core.spatialPartitioning.FlatGridPartitioner;
 import org.apache.sedona.core.spatialPartitioning.KDBTree;
 import org.apache.sedona.core.spatialPartitioning.KDBTreePartitioner;
@@ -57,6 +56,7 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.wololo.geojson.Feature;
+import org.wololo.jts2geojson.GeoJSONWriter;
 import scala.Tuple2;
 
 import java.io.Serializable;
@@ -220,7 +220,7 @@ public class SpatialRDD<T extends Geometry>
             throw new Exception("[AbstractSpatialRDD][spatialPartitioning] SpatialRDD boundary is null. Please call analyze() first.");
         }
         if (this.approximateTotalCount == -1) {
-            throw new Exception("[AbstractSpatialRDD][spatialPartitioning] SpatialRDD total count is unkown. Please call analyze() first.");
+            throw new Exception("[AbstractSpatialRDD][spatialPartitioning] SpatialRDD total count is unknown. Please call analyze() first.");
         }
 
         //Calculate the number of samples we need to take.
@@ -259,7 +259,8 @@ public class SpatialRDD<T extends Geometry>
                 break;
             }
             case KDBTREE: {
-                final KDBTree tree = new KDBTree(samples.size() / numPartitions, numPartitions, paddedBoundary);
+                int maxItemsPerNode = Math.max(samples.size() / numPartitions, 1);
+                final KDBTree tree = new KDBTree(maxItemsPerNode, numPartitions, paddedBoundary);
                 for (final Envelope sample : samples) {
                     tree.insert(sample);
                 }
@@ -579,7 +580,7 @@ public class SpatialRDD<T extends Geometry>
                     throws Exception
             {
                 ArrayList<String> result = new ArrayList();
-                GeoJSONWriterNew writer = new GeoJSONWriterNew();
+                GeoJSONWriter writer = new GeoJSONWriter();
                 while (iterator.hasNext()) {
                     Geometry spatialObject = iterator.next();
                     Feature jsonFeature;

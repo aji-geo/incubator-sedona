@@ -23,11 +23,11 @@ from sedona.core.enums.join_build_side import JoinBuildSide
 from sedona.core.spatialOperator import JoinQuery
 from sedona.core.spatialOperator.join_params import JoinParams
 from tests.spatial_operator.test_join_base import TestJoinBase
-from tests.tools import tests_path
+from tests.tools import tests_resource
 
-input_location = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
-query_window_set = os.path.join(tests_path, "resources/zcta510-small.csv")
-query_polygon_set = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
+input_location = os.path.join(tests_resource, "primaryroads-polygon.csv")
+query_window_set = os.path.join(tests_resource, "zcta510-small.csv")
+query_polygon_set = os.path.join(tests_resource, "primaryroads-polygon.csv")
 splitter = FileDataSplitter.CSV
 contains_match_count = 6941
 contains_match_with_original_duplicates = 9334
@@ -79,7 +79,7 @@ class TestRectangleJoin(TestJoinBase):
 
         self.partition_rdds(query_rdd, spatial_rdd, grid_type)
 
-        join_params = JoinParams(intersects, index_type, JoinBuildSide.LEFT)
+        join_params = JoinParams(True, intersects, index_type, JoinBuildSide.LEFT)
         result = JoinQuery.spatialJoin(query_rdd, spatial_rdd, join_params).collect()
 
         self.sanity_check_flat_join_results(result)

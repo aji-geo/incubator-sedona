@@ -19,7 +19,6 @@
 
 import org.apache.log4j.{Level, Logger}
 import org.apache.sedona.core.enums.{FileDataSplitter, GridType, IndexType}
-import org.apache.sedona.core.formatMapper.EarthdataHDFPointMapper
 import org.apache.sedona.core.spatialOperator.JoinQuery
 import org.apache.sedona.core.spatialRDD.{PointRDD, PolygonRDD, RectangleRDD}
 import org.apache.sedona.sql.utils.SedonaSQLRegistrator
@@ -76,28 +75,22 @@ object ScalaExample extends App{
 	val PolygonOffset = prop.getProperty("offset").toInt
 	val PolygonSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"))
 	val PolygonNumPartitions = prop.getProperty("numPartitions").toInt
-	ConfFile = new FileInputStream(resourcePath + "babylon.linestring.properties")
-	prop.load(ConfFile)
-	val LineStringInputLocation = "file://" + System.getProperty("user.dir") + "/" + resourcePath + prop.getProperty("inputLocation")
-	val LineStringOffset = prop.getProperty("offset").toInt
-	val LineStringSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"))
-	val LineStringNumPartitions = prop.getProperty("numPartitions").toInt
 	val USMainLandBoundary = new Envelope(-126.790180, -64.630926, 24.863836, 50.000)
-	val earthdataInputLocation = System.getProperty("user.dir") + "/src/test/resources/modis/modis.csv"
-	val earthdataNumPartitions = 5
-	val HDFIncrement = 5
-	val HDFOffset = 2
-	val HDFRootGroupName = "MOD_Swath_LST"
-	val HDFDataVariableName = "LST"
-	val HDFDataVariableList = Array("LST", "QC", "Error_LST", "Emis_31", "Emis_32")
-	val HDFswitchXY = true
-	val urlPrefix = System.getProperty("user.dir") + "/src/test/resources/modis/"
+//	val earthdataInputLocation = System.getProperty("user.dir") + "/src/test/resources/modis/modis.csv"
+//	val earthdataNumPartitions = 5
+//	val HDFIncrement = 5
+//	val HDFOffset = 2
+//	val HDFRootGroupName = "MOD_Swath_LST"
+//	val HDFDataVariableName = "LST"
+//	val HDFDataVariableList = Array("LST", "QC", "Error_LST", "Emis_31", "Emis_32")
+//	val HDFswitchXY = true
+//	val urlPrefix = System.getProperty("user.dir") + "/src/test/resources/modis/"
 
 	if (buildScatterPlot(scatterPlotOutputPath)
 		&& buildHeatMap(heatMapOutputPath)
 		&& buildChoroplethMap(choroplethMapOutputPath)
 		&& parallelFilterRenderNoStitch(parallelFilterRenderOutputPath)
-		&& earthdataVisualization(earthdataScatterPlotOutputPath)
+//		&& earthdataVisualization(earthdataScatterPlotOutputPath)
 		&& sqlApiVisualization(sqlApiOutputPath))
 		System.out.println("All SedonaViz Demos have passed.")
 	else System.out.println("SedonaViz Demos failed.")
@@ -174,17 +167,17 @@ object ScalaExample extends App{
 		true
 	}
 
-	def earthdataVisualization(outputPath: String): Boolean = {
-		val earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement, HDFOffset, HDFRootGroupName,
-			HDFDataVariableList, HDFDataVariableName, HDFswitchXY, urlPrefix)
-		val spatialRDD = new PointRDD(sparkContext, earthdataInputLocation, earthdataNumPartitions, earthdataHDFPoint, StorageLevel.MEMORY_ONLY)
-		val visualizationOperator = new ScatterPlot(1000, 600, spatialRDD.boundaryEnvelope, ColorizeOption.EARTHOBSERVATION, false, false)
-		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.BLUE, true)
-		visualizationOperator.Visualize(sparkContext, spatialRDD)
-		val imageGenerator = new ImageGenerator
-		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, outputPath, ImageType.PNG)
-		true
-	}
+//	def earthdataVisualization(outputPath: String): Boolean = {
+//		val earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement, HDFOffset, HDFRootGroupName,
+//			HDFDataVariableList, HDFDataVariableName, HDFswitchXY, urlPrefix)
+//		val spatialRDD = new PointRDD(sparkContext, earthdataInputLocation, earthdataNumPartitions, earthdataHDFPoint, StorageLevel.MEMORY_ONLY)
+//		val visualizationOperator = new ScatterPlot(1000, 600, spatialRDD.boundaryEnvelope, ColorizeOption.EARTHOBSERVATION, false, false)
+//		visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.BLUE, true)
+//		visualizationOperator.Visualize(sparkContext, spatialRDD)
+//		val imageGenerator = new ImageGenerator
+//		imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, outputPath, ImageType.PNG)
+//		true
+//	}
 
 	def sqlApiVisualization(outputPath: String): Boolean = {
 		val sqlContext = new SQLContext(sparkContext)
@@ -192,25 +185,13 @@ object ScalaExample extends App{
 		SedonaSQLRegistrator.registerAll(spark)
 		SedonaVizRegistrator.registerAll(spark)
 		var pointDf = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(PointInputLocation)
-		pointDf.createOrReplaceTempView("pointtable")
-		spark.sql(
-			"""
-				|CREATE OR REPLACE TEMP VIEW pointtable AS
-				|SELECT ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as shape
-				|FROM pointtable
-			""".stripMargin)
-		spark.sql(
-			"""
-				|CREATE OR REPLACE TEMP VIEW pointtable AS
-				|SELECT *
-				|FROM pointtable
-				|WHERE ST_Contains(ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000),shape)
-			""".stripMargin)
+		pointDf.selectExpr("ST_Point(cast(_c0 as Decimal(24,20)),cast(_c1 as Decimal(24,20))) as shape")
+			.filter("ST_Contains(ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000),shape)").createOrReplaceTempView("pointtable")
 		spark.sql(
 			"""
 				|CREATE OR REPLACE TEMP VIEW pixels AS
 				|SELECT pixel, shape FROM pointtable
-				|LATERAL VIEW ST_Pixelize(shape, 256, 256, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000)) AS pixel
+				|LATERAL VIEW Explode(ST_Pixelize(shape, 256, 256, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000))) AS pixel
 			""".stripMargin)
 		spark.sql(
 			"""

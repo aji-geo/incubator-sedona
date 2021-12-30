@@ -31,11 +31,9 @@ import os
 from tests.properties.polygon_properties import polygon_rdd_input_location, polygon_rdd_start_offset, polygon_rdd_end_offset, \
     polygon_rdd_splitter, polygon_rdd_index_type
 from tests.test_base import TestBase
-from tests.tools import tests_path
+from tests.tools import tests_resource
 
-resource_folder = "resources"
-
-point_rdd_input_location = os.path.join(tests_path, resource_folder, "arealm-small.csv")
+point_rdd_input_location = os.path.join(tests_resource, "arealm-small.csv")
 
 point_rdd_splitter = FileDataSplitter.CSV
 
@@ -271,7 +269,7 @@ class TestSpatialRDD(TestBase):
         query_window_rdd.spatialPartitioning(object_rdd.getPartitioner())
 
         for i in range(each_query_loop_times):
-            join_params = JoinParams(False, polygon_rdd_index_type, JoinBuildSide.LEFT)
+            join_params = JoinParams(True, False, polygon_rdd_index_type, JoinBuildSide.LEFT)
             resultSize = JoinQuery.spatialJoin(
                 query_window_rdd,
                 object_rdd,

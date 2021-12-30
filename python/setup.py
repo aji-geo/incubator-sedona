@@ -25,19 +25,23 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name='sedona',
+    name='apache-sedona',
     version=version,
-    description='Apache Sedona is a cluster computing system for processing large-scale spatial data. Apache Sedona is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the Apache Incubator. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.',
-    url='https://github.com/apache/incubator-sedona',
+    description='Apache Sedona is a cluster computing system for processing large-scale spatial data',
+    url='https://sedona.apache.org',
+    license="Apache License v2.0",
     author='Apache Sedona',
     author_email='dev@sedona.apache.org',
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     long_description=long_description,
     long_description_content_type="text/markdown",
     python_requires='>=3.6',
-    install_requires=['pyspark<3.1.0', 'attrs', "shapely"],
+    install_requires=['attrs', "shapely"],
+    extras_require={"spark": ['pyspark>=2.3.0']},
     project_urls={
-        'Bug Reports': 'https://github.com/apache/incubator-sedona'
+        'Documentation': 'https://sedona.apache.org',
+        'Source code': 'https://github.com/apache/incubator-sedona',
+        'Bug Reports': 'https://issues.apache.org/jira/projects/SEDONA'
     },
     classifiers=[
         "Programming Language :: Python :: 3",

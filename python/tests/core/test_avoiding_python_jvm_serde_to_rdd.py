@@ -25,11 +25,11 @@ from tests.test_base import TestBase
 
 import os
 
-from tests.tools import tests_path
+from tests.tools import tests_resource
 from shapely.wkt import loads
 
-bank_csv_path = os.path.join(tests_path, "resources/small/points.csv")
-areas_csv_path = os.path.join(tests_path, "resources/small/areas.csv")
+bank_csv_path = os.path.join(tests_resource, "small/points.csv")
+areas_csv_path = os.path.join(tests_resource, "small/areas.csv")
 
 
 class TestOmitPythonJvmSerdeToRDD(TestBase):
@@ -44,7 +44,7 @@ class TestOmitPythonJvmSerdeToRDD(TestBase):
         poi_point_rdd.spatialPartitioning(GridType.QUADTREE)
         areas_polygon_rdd.spatialPartitioning(poi_point_rdd.getPartitioner())
 
-        jvm_sedona_rdd = JoinQueryRaw.spatialJoin(poi_point_rdd, areas_polygon_rdd, JoinParams())
+        jvm_sedona_rdd = JoinQueryRaw.spatialJoin(poi_point_rdd, areas_polygon_rdd, JoinParams(considerBoundaryIntersection=True))
         sedona_rdd = jvm_sedona_rdd.to_rdd().collect()
         assert sedona_rdd.__len__() == 5
 

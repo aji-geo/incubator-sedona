@@ -25,13 +25,15 @@ import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.types.BooleanType
 
+abstract class ST_Predicate extends Expression
+
 /**
   * Test if leftGeometry full contains rightGeometry
   *
   * @param inputExpressions
   */
 case class ST_Contains(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
+  extends ST_Predicate with CodegenFallback {
 
   // This is a binary expression
   assert(inputExpressions.length == 2)
@@ -50,10 +52,14 @@ case class ST_Contains(inputExpressions: Seq[Expression])
 
     val rightGeometry = GeometrySerializer.deserialize(rightArray)
 
-    return leftGeometry.covers(rightGeometry)
+    leftGeometry.covers(rightGeometry)
   }
 
   override def dataType = BooleanType
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 /**
@@ -62,7 +68,7 @@ case class ST_Contains(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_Intersects(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
+  extends ST_Predicate with CodegenFallback {
   override def nullable: Boolean = false
 
   // This is a binary expression
@@ -80,10 +86,14 @@ case class ST_Intersects(inputExpressions: Seq[Expression])
 
     val rightGeometry = GeometrySerializer.deserialize(rightArray)
 
-    return leftGeometry.intersects(rightGeometry)
+    leftGeometry.intersects(rightGeometry)
   }
 
   override def dataType = BooleanType
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 /**
@@ -92,7 +102,7 @@ case class ST_Intersects(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_Within(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
+  extends ST_Predicate with CodegenFallback {
   override def nullable: Boolean = false
 
   // This is a binary expression
@@ -110,10 +120,14 @@ case class ST_Within(inputExpressions: Seq[Expression])
 
     val rightGeometry = GeometrySerializer.deserialize(rightArray)
 
-    return leftGeometry.coveredBy(rightGeometry)
+    leftGeometry.coveredBy(rightGeometry)
   }
 
   override def dataType = BooleanType
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 
@@ -123,7 +137,9 @@ case class ST_Within(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_Crosses(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
+  extends ST_Predicate with CodegenFallback {
+  assert(inputExpressions.length == 2)
+
   override def nullable: Boolean = false
 
   override def toString: String = s" **${ST_Crosses.getClass.getName}**  "
@@ -131,8 +147,6 @@ case class ST_Crosses(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 
   override def eval(inputRow: InternalRow): Any = {
-    assert(inputExpressions.length == 2)
-
     val leftArray = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData]
     val rightArray = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData]
 
@@ -140,10 +154,14 @@ case class ST_Crosses(inputExpressions: Seq[Expression])
 
     val rightGeometry = GeometrySerializer.deserialize(rightArray)
 
-    return leftGeometry.crosses(rightGeometry)
+    leftGeometry.crosses(rightGeometry)
   }
 
   override def dataType = BooleanType
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 
@@ -153,7 +171,7 @@ case class ST_Crosses(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_Overlaps(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
+  extends ST_Predicate with CodegenFallback {
   override def nullable: Boolean = false
 
   // This is a binary expression
@@ -171,10 +189,14 @@ case class ST_Overlaps(inputExpressions: Seq[Expression])
 
     val rightGeometry = GeometrySerializer.deserialize(rightArray)
 
-    return leftGeometry.overlaps(rightGeometry)
+    leftGeometry.overlaps(rightGeometry)
   }
 
   override def dataType = BooleanType
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 /**
@@ -183,7 +205,7 @@ case class ST_Overlaps(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_Touches(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
+  extends ST_Predicate with CodegenFallback {
   override def nullable: Boolean = false
 
   // This is a binary expression
@@ -201,10 +223,14 @@ case class ST_Touches(inputExpressions: Seq[Expression])
 
     val rightGeometry = GeometrySerializer.deserialize(rightArray)
 
-    return leftGeometry.touches(rightGeometry)
+    leftGeometry.touches(rightGeometry)
   }
 
   override def dataType = BooleanType
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 /**
@@ -213,7 +239,7 @@ case class ST_Touches(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_Equals(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
+  extends ST_Predicate with CodegenFallback {
   override def nullable: Boolean = false
 
   // This is a binary expression
@@ -235,10 +261,12 @@ case class ST_Equals(inputExpressions: Seq[Expression])
     // Returns GeometryCollection object
     val symDifference = leftGeometry.symDifference(rightGeometry)
 
-    val isEqual = symDifference.isEmpty
-
-    return isEqual
+    symDifference.isEmpty
   }
 
   override def dataType = BooleanType
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }

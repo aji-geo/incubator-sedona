@@ -22,7 +22,7 @@
     <parent>
         <artifactId>sedona-parent</artifactId>
         <groupId>org.apache.sedona</groupId>
-        <version>1.0.1-incubator-SNAPSHOT</version>
+        <version>1.2.0-incubating-SNAPSHOT</version>
     </parent>
     <artifactId>sedona-python-adapter-${spark.compat.version}_${scala.compat.version}</artifactId>
 
@@ -33,6 +33,7 @@
 
     <properties>
         <maven.deploy.skip>false</maven.deploy.skip>
+        <geotools.scope>provided</geotools.scope>
     </properties>
 
     <dependencies>
@@ -58,9 +59,10 @@
         </dependency>
         <!--for CRS transformation-->
         <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-main</artifactId>
-            <version>${geotools.version}</version>
+            <groupId>org.datasyslab</groupId>
+            <artifactId>geotools-wrapper</artifactId>
+            <version>geotools-${geotools.version}</version>
+            <scope>${geotools.scope}</scope>
             <exclusions>
                 <exclusion>
                     <groupId>org.locationtech.jts</groupId>
@@ -75,38 +77,28 @@
         <!--for CRS transformation-->
         <dependency>
             <groupId>org.geotools</groupId>
-            <artifactId>gt-referencing</artifactId>
-            <version>${geotools.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!--for CRS transformation-->
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-epsg-hsql</artifactId>
-            <version>${geotools.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!--for CRS transformation-->
-        <dependency>
-            <groupId>org.geotools</groupId>
             <artifactId>gt-epsg-extension</artifactId>
             <version>${geotools.version}</version>
+            <scope>${geotools.scope}</scope>
             <exclusions>
                 <exclusion>
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <!--for GeoTiff Reader-->
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-geotiff</artifactId>
+            <version>${geotools.version}</version>
+            <scope>${geotools.scope}</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-coverage</artifactId>
+            <version>${geotools.version}</version>
+            <scope>${geotools.scope}</scope>
         </dependency>
     </dependencies>
     <build>
@@ -137,4 +129,18 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>geotools</id>
+            <activation>
+                <property>
+                    <name>geotools</name>
+                </property>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <geotools.scope>compile</geotools.scope>
+            </properties>
+        </profile>
+    </profiles>
 </project>

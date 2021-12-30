@@ -147,7 +147,7 @@ class scalaTest extends SparkUtil {
     queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
 
     for (i <- 1 to eachQueryLoopTimes) {
-      val joinParams = new JoinParams(false, PolygonRDDIndexType, JoinBuildSide.LEFT)
+      val joinParams = new JoinParams(true, false, PolygonRDDIndexType, JoinBuildSide.LEFT)
       val resultSize = JoinQuery.spatialJoin(queryWindowRDD, objectRDD, joinParams).count()
     }
   }
@@ -178,7 +178,8 @@ class scalaTest extends SparkUtil {
     }
   }
 
-  test("should pass earthdata format mapper test") {
+  // Tests here have been ignored. A new feature that reads HDF will be added.
+  ignore("should pass earthdata format mapper test") {
     val InputLocation = System.getProperty("user.dir") + "/src/test/resources/modis/modis.csv"
     val splitter = FileDataSplitter.CSV
     val indexType = IndexType.RTREE

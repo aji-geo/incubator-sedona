@@ -21,10 +21,13 @@ package org.apache.sedona.sql.UDF
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
 import org.apache.spark.sql.expressions.{Aggregator, UserDefinedAggregateFunction}
 import org.apache.spark.sql.sedona_sql.expressions._
+import org.apache.spark.sql.sedona_sql.expressions.collect.ST_Collect
+import org.apache.spark.sql.sedona_sql.expressions.raster.{RS_AddBands, RS_Array, RS_Base64, RS_BitwiseAnd, RS_BitwiseOr, RS_Count, RS_DivideBands, RS_FetchRegion, RS_GetBand, RS_GreaterThan, RS_GreaterThanEqual, RS_HTML, RS_LessThan, RS_LessThanEqual, RS_LogicalDifference, RS_LogicalOver, RS_Mean, RS_Mode, RS_Modulo, RS_MultiplyBands, RS_MultiplyFactor, RS_Normalize, RS_NormalizedDifference, RS_SquareRoot, RS_SubtractBands}
 import org.locationtech.jts.geom.Geometry
 
 object Catalog {
   val expressions: Seq[FunctionBuilder] = Seq(
+    // Expression for vectors
     ST_PointFromText,
     ST_PolygonFromText,
     ST_LineStringFromText,
@@ -38,6 +41,7 @@ object Catalog {
     ST_Intersects,
     ST_Within,
     ST_Distance,
+    ST_3DDistance,
     ST_ConvexHull,
     ST_NPoints,
     ST_Buffer,
@@ -58,14 +62,21 @@ object Catalog {
     ST_SimplifyPreserveTopology,
     ST_AsText,
     ST_AsGeoJSON,
+    ST_AsBinary,
+    ST_AsEWKB,
+    ST_SRID,
+    ST_SetSRID,
     ST_GeometryType,
     ST_NumGeometries,
     ST_LineMerge,
     ST_Azimuth,
     ST_X,
     ST_Y,
+    ST_Z,
     ST_StartPoint,
     ST_Boundary,
+    ST_MinimumBoundingRadius,
+    ST_MinimumBoundingCircle,
     ST_EndPoint,
     ST_ExteriorRing,
     ST_GeometryN,
@@ -77,7 +88,41 @@ object Catalog {
     ST_AddPoint,
     ST_RemovePoint,
     ST_IsRing,
-    ST_FlipCoordinates
+    ST_FlipCoordinates,
+    ST_LineSubstring,
+    ST_LineInterpolatePoint,
+    ST_SubDivideExplode,
+    ST_SubDivide,
+    ST_MakePolygon,
+    ST_GeoHash,
+    ST_GeomFromGeoHash,
+    ST_Collect,
+    // Expression for rasters
+    RS_NormalizedDifference,
+    RS_Mean,
+    RS_Mode,
+    RS_FetchRegion,
+    RS_GreaterThan,
+    RS_GreaterThanEqual,
+    RS_LessThan,
+    RS_LessThanEqual,
+    RS_AddBands,
+    RS_SubtractBands,
+    RS_DivideBands,
+    RS_MultiplyFactor,
+    RS_MultiplyBands,
+    RS_BitwiseAnd,
+    RS_BitwiseOr,
+    RS_Count,
+    RS_Modulo,
+    RS_GetBand,
+    RS_SquareRoot,
+    RS_LogicalDifference,
+    RS_LogicalOver,
+    RS_Base64,
+    RS_HTML,
+    RS_Array,
+    RS_Normalize
   )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(

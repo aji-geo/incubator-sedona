@@ -22,10 +22,11 @@ import org.apache.log4j.{Level, Logger}
 import org.apache.sedona.core.serde.SedonaKryoRegistrator
 import org.apache.sedona.sql.utils.SedonaSQLRegistrator
 import org.apache.spark.serializer.KryoSerializer
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
 trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
+  Logger.getRootLogger().setLevel(Level.WARN)
   Logger.getLogger("org.apache").setLevel(Level.WARN)
   Logger.getLogger("com").setLevel(Level.WARN)
   Logger.getLogger("akka").setLevel(Level.WARN)
@@ -38,8 +39,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     .config("spark.sql.warehouse.dir", warehouseLocation)
     .getOrCreate()
 
-  val resourceFolder = System.getProperty("user.dir") + "/src/test/resources/"
-
+  val resourceFolder = System.getProperty("user.dir") + "/../core/src/test/resources/"
   val mixedWkbGeometryInputLocation = resourceFolder + "county_small_wkb.tsv"
   val mixedWktGeometryInputLocation = resourceFolder + "county_small.tsv"
   val shapefileInputLocation = resourceFolder + "shapefiles/dbf"
@@ -70,4 +70,11 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     //SedonaSQLRegistrator.dropAll(spark)
     //spark.stop
   }
+
+  def loadCsv(path: String): DataFrame = {
+    sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(path)
+  }
+
+  lazy val buildPointDf = loadCsv(csvPointInputLocation).selectExpr("ST_Point(cast(_c0 as Decimal(24,20)),cast(_c1 as Decimal(24,20))) as pointshape")
+  lazy val buildPolygonDf = loadCsv(csvPolygonInputLocation).selectExpr("ST_PolygonFromEnvelope(cast(_c0 as Decimal(24,20)),cast(_c1 as Decimal(24,20)), cast(_c2 as Decimal(24,20)), cast(_c3 as Decimal(24,20))) as polygonshape")
 }
